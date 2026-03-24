@@ -42,8 +42,8 @@ public class CourseEntity {
 	@Column(name = "updated_on", updatable = true)
 	private Timestamp updatedOn;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "user_id", nullable = false)
 	private UserEntity user;
 
 	@ManyToOne

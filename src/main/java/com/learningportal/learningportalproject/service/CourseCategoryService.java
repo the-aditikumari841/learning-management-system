@@ -3,7 +3,6 @@ package com.learningportal.learningportalproject.service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,56 +18,47 @@ import jakarta.persistence.EntityNotFoundException;
 public class CourseCategoryService {
 	@Autowired
 	private CourseCategoryRepository categoryRepository;
+
 	@Autowired
 	private CategoryMapper categoryMapper;
 
 	public List<CategoryDto> findAllCategory() {
-		List<CourseCategoryEntity> coursecategoryEntity = categoryRepository.findAll();
-		List<CategoryDto> categoryDtos = categoryMapper.toDto(coursecategoryEntity);
-		return categoryDtos;
+		return categoryMapper.toDto(categoryRepository.findAll());
 	}
 
-	public CategoryDto findById(String courseCategory) {
-		Optional<CourseCategoryEntity> optional = categoryRepository.findById(courseCategory);
-		if (optional.isPresent()) {
-			CourseCategoryEntity coursecategoryEntity = optional.get();
-			CategoryDto categoryDto = categoryMapper.toDto(coursecategoryEntity);
-			return categoryDto;
-		} else {
-			throw new RuntimeException("Course Category " + courseCategory + "is not present");
+	public CategoryDto findById(Long id) {
+		CourseCategoryEntity entity = categoryRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Course category " + id + "is not found"
+				));
+		return categoryMapper.toDto(entity);
+	}
+
+	public void deleteCategory(Long id)
+	{
+		if(!categoryRepository.existsById(id)) {
+			throw new EntityNotFoundException("Category " + id + " not found");
 		}
+		categoryRepository.deleteById(id);
 	}
 
-	public void deleteCategory(String courseCategory) {
-		Optional<CourseCategoryEntity> optional = categoryRepository.findById(courseCategory);
-		if (optional.isPresent()) {
-			CourseCategoryEntity coursecategoryEntity = optional.get();
-			CategoryDto categoryDto = categoryMapper.toDto(coursecategoryEntity);
-			CourseCategoryEntity mappedEntity = categoryMapper.toEntity(categoryDto);
-			categoryRepository.delete(mappedEntity);
-		} else {
-			System.out.println("Given Course ID is not present");
-		}
+	public CategoryDto saveCategory(CategoryDto dto) {
+		CourseCategoryEntity entity = categoryMapper.toEntity(dto);
+		entity.setCreatedOn(Timestamp.from(Instant.now()));
+		CourseCategoryEntity saved = categoryRepository.save(entity);
+		return categoryMapper.toDto(saved);
 	}
 
-	public CategoryDto saveCategory(CategoryDto category) {
-		CourseCategoryEntity categoryEntity = categoryMapper.toEntity(category);
-		categoryRepository.save(categoryEntity);
-		return category;
+	public CategoryDto updateCategory(CategoryDto dto, Long id) {
+
+		CourseCategoryEntity existing = categoryRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(
+						"Course Category " + id + " is not found"
+				));
+
+		existing.setName(dto.getName());
+		existing.setUpdatedOn(Timestamp.from(Instant.now()));
+		CourseCategoryEntity updated = categoryRepository.save(existing);
+		return categoryMapper.toDto(updated);
 	}
-
-	public CategoryDto updateCategory(CategoryDto categoryDto, String courseCategory) {
-
-		CourseCategoryEntity coursecategoryEntity = categoryMapper.toEntity(categoryDto);
-
-		Optional<CourseCategoryEntity> object = categoryRepository.findById(courseCategory);
-		if (object.isPresent()) {
-			categoryDto.setUpdatedOn(Timestamp.from(Instant.now()));
-			categoryRepository.save(coursecategoryEntity);
-			return categoryDto;
-		} else {
-			throw new EntityNotFoundException("Course category " + courseCategory + " is not found");
-		}
-	}
-
 }

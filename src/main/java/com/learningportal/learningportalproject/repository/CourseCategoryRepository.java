@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.learningportal.learningportalproject.entity.CourseCategoryEntity;
 
 @Repository
-public interface CourseCategoryRepository extends JpaRepository<CourseCategoryEntity, String> {
+public interface CourseCategoryRepository extends JpaRepository<CourseCategoryEntity, Long> {
 
 }

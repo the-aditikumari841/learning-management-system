@@ -2,12 +2,7 @@ package com.learningportal.learningportalproject.entity;
 
 import java.sql.Timestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,21 +11,20 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "course_category_entity")
+@Table(name = "course_category")
 public class CourseCategoryEntity {
 
 	@Id
-	@Column(name = "course_category")
-	private String courseCategory;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(name = "name", unique = true, nullable = false)
+	private String name;
 
 	@Column(name = "created_on", updatable = false)
 	private Timestamp createdOn;
 
-	@Column(name = "updated_on", updatable = true)
+	@Column(name = "updated_on")
 	private Timestamp updatedOn;
-
-	@ManyToOne
-	@JoinColumn(name = "course_id")
-	private CourseEntity course;
 
 }

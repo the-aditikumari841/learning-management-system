@@ -29,8 +29,8 @@ public class CourseCategoryController {
 	}
 
 	@GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public CategoryDto findCategoryById(@PathVariable String courseCategory) {
-		return categoryService.findById(courseCategory);
+	public CategoryDto findCategoryById(@PathVariable("id") Long id) {
+		return categoryService.findById(id);
 	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,13 +39,14 @@ public class CourseCategoryController {
 	}
 
 	@PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public CategoryDto updateCategory(@RequestBody CategoryDto categoryDto, @PathVariable String courseCategory) {
-		return categoryService.updateCategory(categoryDto, courseCategory);
+	public CategoryDto updateCategory(@RequestBody CategoryDto categoryDto, @PathVariable Long id) {
+		return categoryService.updateCategory(categoryDto, id);
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public void deleteCategory(@PathVariable String courseCategory) {
-		categoryService.deleteCategory(courseCategory);
+	public void deleteCategory(@PathVariable Long id)
+	{
+		categoryService.deleteCategory(id);
 	}
 
 }
