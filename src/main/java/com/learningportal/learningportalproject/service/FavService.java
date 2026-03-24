@@ -14,8 +14,9 @@ import com.learningportal.learningportalproject.repository.FavRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
