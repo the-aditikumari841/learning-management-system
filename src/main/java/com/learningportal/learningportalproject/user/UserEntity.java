@@ -1,23 +1,13 @@
 package com.learningportal.learningportalproject.user;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-
-import com.learningportal.learningportalproject.course.CourseEntity;
-import com.learningportal.learningportalproject.favorite.FavEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import com.learningportal.learningportalproject.common.enums.UserRole;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Date;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -26,36 +16,30 @@ import lombok.NoArgsConstructor;
 @Table(name = "user_entity")
 public class UserEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long userID;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long userId;
 
-	@Column(name = "username")
-	private String userName;
+    @Column(name = "username")
+    private String userName;
 
-	@Column(name = "gender")
-	private String gender;
+    @Column(name = "password")
+    private String password;
 
-	@Column(name = "date_of_birth")
-	private Date dateOfBirth;
+    @Column(name = "gender")
+    private String gender;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "created_on", nullable = false, updatable = false)
-	private Timestamp createdOn;
+    @Column(name = "date_of_birth")
+    private Date dateOfBirth;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "updated_on", updatable = true)
-	private Timestamp updatedOn;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
 
-	@Column(name = "password")
-	private String password;
+    @Column(name = "created_on", nullable = false, updatable = false)
+    private Timestamp createdOn;
 
-	@ManyToOne
-	@JoinColumn(name = "course_id")
-	private CourseEntity course;
-
-	@ManyToOne
-	@JoinColumn(name = "fav_id")
-	private FavEntity fav;
+    @Column(name = "updated_on", updatable = true)
+    private Timestamp updatedOn;
 
 }

@@ -1,77 +1,92 @@
 package com.learningportal.learningportalproject.user;
 
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 
 public class UserService {
-	@Autowired
-	private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	@Autowired
-	private UserMapper userMapper;
+    private final UserMapper userMapper;
 
-	public List<UserDto> findAllUsers() {
-		List<UserEntity> userEntity = userRepository.findAll();
-		List<UserDto> userDtos = userMapper.toDto(userEntity);
-		return userDtos;
-	}
+    public List<UserDto> findAllUsers() {
+        List<UserEntity> userEntity = userRepository.findAll();
+        List<UserDto> userDtos = userMapper.toDto(userEntity);
+        return userDtos;
+    }
 
-	public UserDto findById(Long userID) {
-		Optional<UserEntity> optional = userRepository.findById(userID);
-		if (optional.isPresent()) {
-			UserEntity userEntity = optional.get();
-			UserDto userDto = userMapper.toDto(userEntity);
-			return userDto;
-		} else {
-			throw new RuntimeException("User with user Id" + userID + "is not present");
-		}
-	}
+    public UserDto findById(Long userID) {
+        UserEntity userEntity = userRepository.findById(userID)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with Id " + userID));
+        return userMapper.toDto(userEntity);
+    }
 
-	public void deleteUser(Long userID) {
-		Optional<UserEntity> optional = userRepository.findById(userID);
-		if (optional.isPresent()) {
-			UserEntity userEntity = optional.get();
-			UserDto userDto = userMapper.toDto(userEntity);
-			UserEntity mappedEntity = userMapper.toEntity(userDto);
-			userRepository.delete(mappedEntity);
-		} else {
-			System.out.println("Given Course ID is not present");
-		}
-	}
+    public void deleteUser(Long userID) {
 
-	public UserDto saveUser(UserDto user) {
-		user.setCreatedOn(Timestamp.from(Instant.now()));
-		UserEntity userEntity = userMapper.toEntity(user);
-		userRepository.save(userEntity);
-		return user;
-	}
+        UserEntity user = userRepository.findById(userID)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        userRepository.delete(user);
+    }
 
-	public UserDto updateUser(UserDto userDto, Long id) {
+    public UserDto saveUser(UserDto user) {
+        if (user.getUserName() == null || user.getUserName().isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
 
-		UserEntity userEntity = userMapper.toEntity(userDto);
+        user.setCreatedOn(Timestamp.from(Instant.now()));
 
-		if (userRepository.existsById(id)) {
-			userDto.setUpdatedOn(Timestamp.from(Instant.now()));
-			userRepository.save(userEntity);
-			return userDto;
-		} else {
-			throw new EntityNotFoundException("User not found with ID: " + id);
-		}
-	}
+        UserEntity userEntity = userMapper.toEntity(user);
+        UserEntity saved = userRepository.save(userEntity);
+
+        return userMapper.toDto(saved);
+    }
+
+    public UserDto updateUser(UserDto userDto, Long userId) {
+
+        UserEntity existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        if (userDto.getUserName() != null && userDto.getUserName().isBlank()) {
+            throw new IllegalArgumentException("Username cannot be blank");
+        }
+        if (userDto.getPassword() != null && userDto.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+
+        if (userDto.getUserName() != null) {
+            existingUser.setUserName(userDto.getUserName());
+        }
+        if (userDto.getPassword() != null) {
+            existingUser.setPassword(userDto.getPassword());
+        }
+
+        if (userDto.getGender() != null) {
+            existingUser.setGender(userDto.getGender());
+        }
+
+        if (userDto.getDateOfBirth() != null) {
+            existingUser.setDateOfBirth(userDto.getDateOfBirth());
+        }
+
+        if (userDto.getRole() != null) {
+            existingUser.setRole(userDto.getRole());
+        }
+
+        existingUser.setUpdatedOn(Timestamp.from(Instant.now()));
+
+        UserEntity saved = userRepository.save(existingUser);
+
+        return userMapper.toDto(saved);
+    }
 
 }
