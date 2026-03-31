@@ -1,5 +1,5 @@
 package com.learningportal.learningportalproject.common.enums;
 
 public enum UserRole {
-	ADMIN, AUTHOR, LEARNER
+    ADMIN, CREATOR, LEARNER
 }

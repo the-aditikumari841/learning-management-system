@@ -2,6 +2,7 @@ package com.learningportal.learningportalproject.user;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -13,12 +14,12 @@ import java.util.List;
 
 public class UserService {
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     public List<UserDto> findAllUsers() {
-        List<UserEntity> userEntity = userRepository.findAll();
-        List<UserDto> userDtos = userMapper.toDto(userEntity);
+        List<UserEntity> userEntities = userRepository.findAll();
+        List<UserDto> userDtos = userMapper.toDto(userEntities);
         return userDtos;
     }
 
@@ -30,22 +31,30 @@ public class UserService {
 
     public void deleteUser(Long userID) {
 
-        UserEntity user = userRepository.findById(userID)
+        UserEntity userEntity = userRepository.findById(userID)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        userRepository.delete(user);
+        userRepository.delete(userEntity);
     }
 
-    public UserDto saveUser(UserDto user) {
-        if (user.getUserName() == null || user.getUserName().isBlank()) {
+    public UserDto saveUser(UserDto userDto) {
+        if (userDto.getUserName() == null || userDto.getUserName().isBlank()) {
             throw new IllegalArgumentException("Username is required");
         }
-        if (user.getPassword() == null || user.getPassword().isBlank()) {
+        if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password is required");
         }
 
-        user.setCreatedOn(Timestamp.from(Instant.now()));
+        //System.out.println("RAW : " + userDto.getPassword());
+        //System.out.println("ENCODED : " + passwordEncoder.encode(userDto.getPassword()));
 
-        UserEntity userEntity = userMapper.toEntity(user);
+        UserEntity userEntity = userMapper.toEntity(userDto);
+
+        userEntity.setCreatedOn(Timestamp.from(Instant.now()));
+
+        userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
+        System.out.println("ENTITY PASSWORD : " + userEntity.getPassword());
+
         UserEntity saved = userRepository.save(userEntity);
 
         return userMapper.toDto(saved);
@@ -67,7 +76,7 @@ public class UserService {
             existingUser.setUserName(userDto.getUserName());
         }
         if (userDto.getPassword() != null) {
-            existingUser.setPassword(userDto.getPassword());
+            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }
 
         if (userDto.getGender() != null) {
