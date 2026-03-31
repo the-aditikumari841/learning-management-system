@@ -18,9 +18,10 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String userName;
 
     @Column(name = "password")
@@ -34,7 +35,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private UserRole role;
+    private UserRole role = UserRole.LEARNER;
 
     @Column(name = "created_on", nullable = false, updatable = false)
     private Timestamp createdOn;
