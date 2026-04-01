@@ -23,7 +23,12 @@ public class AuthController {
 
         String result = authService.register(request);
 
-        ApiResponse response = new ApiResponse(result, "SUCCESS", LocalDateTime.now(), null);
+        ApiResponse response = new ApiResponse(
+                result,
+                "SUCCESS",
+                null,
+                LocalDateTime.now(),
+                null);
         return ResponseEntity.ok(response);
 
     }
@@ -31,9 +36,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        String result = authService.login(request);
+        String token = authService.login(request);
 
-        ApiResponse response = new ApiResponse(result, "SUCCESS", LocalDateTime.now(), null);
+        ApiResponse response = new ApiResponse(
+                "LOGIN SUCCESSFUL",
+                "SUCCESS",
+                token,
+                LocalDateTime.now(),
+                null);
 
         return ResponseEntity.ok(response);
     }

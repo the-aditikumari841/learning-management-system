@@ -25,6 +25,7 @@ public class GlobalExceptionHandler {
         ApiResponse response = new ApiResponse(
                 "Validation Failed",
                 "ERROR",
+                null,
                 LocalDateTime.now(),
                 errors
         );
@@ -39,6 +40,7 @@ public class GlobalExceptionHandler {
         ApiResponse response = new ApiResponse(
                 ex.getMessage(),
                 "ERROR",
+                null,
                 LocalDateTime.now(),
                 null
         );

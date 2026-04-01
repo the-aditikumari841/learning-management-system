@@ -1,5 +1,6 @@
 package com.learningportal.learningportalproject.auth;
 
+import com.learningportal.learningportalproject.security.JwtService;
 import com.learningportal.learningportalproject.user.UserEntity;
 import com.learningportal.learningportalproject.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public String register(RegisterRequest request) {
 
@@ -42,7 +44,8 @@ public class AuthService {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return "LOGIN SUCCESSFUL";
+//        return "LOGIN SUCCESSFUL";
+        return jwtService.generateToken(userEntity.getUserName());
     }
 
 }

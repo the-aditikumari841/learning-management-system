@@ -11,6 +11,7 @@ import java.util.Map;
 public class ApiResponse {
     private String message;
     private String status;
+    private String token;
     private LocalDateTime timestamp;
 
     private Map<String, String> errors;
