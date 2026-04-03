@@ -1,5 +1,6 @@
 package com.learningportal.learningportalproject.user;
 
+import com.learningportal.learningportalproject.common.enums.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,11 +54,17 @@ public class UserService {
 
         userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-        System.out.println("ENTITY PASSWORD : " + userEntity.getPassword());
-
         UserEntity saved = userRepository.save(userEntity);
 
         return userMapper.toDto(saved);
+    }
+
+    public UserDto updateUserRole(Long userId, UserRole role) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        userEntity.setRole(role);
+        return userMapper.toDto(userRepository.save(userEntity));
     }
 
     public UserDto updateUser(UserDto userDto, Long userId) {
@@ -85,10 +92,6 @@ public class UserService {
 
         if (userDto.getDateOfBirth() != null) {
             existingUser.setDateOfBirth(userDto.getDateOfBirth());
-        }
-
-        if (userDto.getRole() != null) {
-            existingUser.setRole(userDto.getRole());
         }
 
         existingUser.setUpdatedOn(Timestamp.from(Instant.now()));

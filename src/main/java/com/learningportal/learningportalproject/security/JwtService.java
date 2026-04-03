@@ -1,5 +1,6 @@
 package com.learningportal.learningportalproject.security;
 
+import com.learningportal.learningportalproject.user.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -29,11 +32,15 @@ public class JwtService {
         key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username) {
+    public String generateToken(UserEntity userEntity) {
         Instant now = Instant.now();
 
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", userEntity.getRole().name());
+
         return Jwts.builder()
-                .setSubject(username)
+                .setClaims(claims)
+                .setSubject(userEntity.getUserName())
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(jwtExpiration)))
                 .signWith(key, SignatureAlgorithm.HS256)

@@ -35,7 +35,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private UserRole role = UserRole.LEARNER;
+    private UserRole role = UserRole.ROLE_LEARNER;
 
     @Column(name = "created_on", nullable = false, updatable = false)
     private Timestamp createdOn;

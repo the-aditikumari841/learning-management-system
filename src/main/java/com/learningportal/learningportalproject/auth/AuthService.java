@@ -1,5 +1,6 @@
 package com.learningportal.learningportalproject.auth;
 
+import com.learningportal.learningportalproject.common.enums.UserRole;
 import com.learningportal.learningportalproject.security.JwtService;
 import com.learningportal.learningportalproject.user.UserEntity;
 import com.learningportal.learningportalproject.user.UserRepository;
@@ -26,6 +27,7 @@ public class AuthService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUserName(request.getUserName().trim());
 
+        userEntity.setRole(UserRole.ROLE_LEARNER);
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userEntity.setCreatedOn(Timestamp.from(Instant.now()));
@@ -45,7 +47,7 @@ public class AuthService {
         }
 
 //        return "LOGIN SUCCESSFUL";
-        return jwtService.generateToken(userEntity.getUserName());
+        return jwtService.generateToken(userEntity);
     }
 
 }
