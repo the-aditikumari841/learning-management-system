@@ -3,6 +3,7 @@ package com.learningportal.learningportalproject.user;
 import com.learningportal.learningportalproject.common.enums.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,22 @@ public class UserService {
     }
 
     public UserDto updateUserRole(Long userId, UserRole role) {
+
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserEntity)) {
+            throw new IllegalStateException("Invalid authentication principal");
+        }
+
+        UserEntity currentUser = (UserEntity) principal;
+
+        if (currentUser.getUserId() == userId) {
+            throw new IllegalArgumentException("Admins cannot change their own role");
+        }
+
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
