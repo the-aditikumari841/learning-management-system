@@ -35,6 +35,23 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findById(userID)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        UserEntity currentUser = (UserEntity) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (currentUser.getUserId() == userID) {
+            throw new IllegalStateException("Admins cannot delete themselves");
+        }
+
+        if (userEntity.getRole() == UserRole.ROLE_ADMIN) {
+            long adminCount = userRepository.countByRole(UserRole.ROLE_ADMIN);
+
+            if (adminCount <= 1) {
+                throw new IllegalStateException("Cannot delete the last admin");
+            }
+        }
         userRepository.delete(userEntity);
     }
 
