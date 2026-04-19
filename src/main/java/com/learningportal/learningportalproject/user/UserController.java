@@ -26,10 +26,16 @@ public class UserController {
         return userService.findAllUsers();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.userId")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/{id}")
     public UserResponse findUserById(@PathVariable Long id) {
         return userService.findById(id);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping(value = "/me")
+    public UserResponse getCurrentUser() {
+        return userService.getCurrentUser();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

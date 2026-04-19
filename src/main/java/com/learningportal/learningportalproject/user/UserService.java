@@ -33,15 +33,32 @@ public class UserService {
         return userMapper.toResponse(userEntity);
     }
 
-    public void deleteUser(Long userId) {
-
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        UserEntity currentUser = (UserEntity) SecurityContextHolder
+    public UserResponse getCurrentUser() {
+        Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
+
+        if (!(principal instanceof UserEntity currentUser)) {
+            throw new IllegalStateException("Invalid authentication principal");
+        }
+
+        return userMapper.toResponse(currentUser);
+    }
+
+    public void deleteUser(Long userId) {
+
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with Id " + userId));
+
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof UserEntity currentUser)) {
+            throw new IllegalStateException("Invalid authentication principal");
+        }
 
         if (currentUser.getUserId() == userId) {
             throw new IllegalStateException("Admins cannot delete themselves");
@@ -96,7 +113,7 @@ public class UserService {
         }
 
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found with Id" + userId));
 
         userEntity.setRole(role);
         return userMapper.toResponse(userRepository.save(userEntity));
