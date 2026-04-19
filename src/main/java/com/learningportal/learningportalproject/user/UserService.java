@@ -1,6 +1,9 @@
 package com.learningportal.learningportalproject.user;
 
 import com.learningportal.learningportalproject.common.enums.UserRole;
+import com.learningportal.learningportalproject.user.dto.CreateUserRequest;
+import com.learningportal.learningportalproject.user.dto.UpdateUserRequest;
+import com.learningportal.learningportalproject.user.dto.UserResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,21 +22,20 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public List<UserDto> findAllUsers() {
-        List<UserEntity> userEntities = userRepository.findAll();
-        List<UserDto> userDtos = userMapper.toDto(userEntities);
-        return userDtos;
+    public List<UserResponse> findAllUsers() {
+        List<UserEntity> users = userRepository.findAll();
+        return userMapper.toResponse(users);
     }
 
-    public UserDto findById(Long userID) {
-        UserEntity userEntity = userRepository.findById(userID)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with Id " + userID));
-        return userMapper.toDto(userEntity);
+    public UserResponse findById(Long userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with Id " + userId));
+        return userMapper.toResponse(userEntity);
     }
 
-    public void deleteUser(Long userID) {
+    public void deleteUser(Long userId) {
 
-        UserEntity userEntity = userRepository.findById(userID)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         UserEntity currentUser = (UserEntity) SecurityContextHolder
@@ -41,7 +43,7 @@ public class UserService {
                 .getAuthentication()
                 .getPrincipal();
 
-        if (currentUser.getUserId() == userID) {
+        if (currentUser.getUserId() == userId) {
             throw new IllegalStateException("Admins cannot delete themselves");
         }
 
@@ -55,40 +57,39 @@ public class UserService {
         userRepository.delete(userEntity);
     }
 
-    public UserDto saveUser(UserDto userDto) {
-        if (userDto.getUserName() == null || userDto.getUserName().isBlank()) {
-            throw new IllegalArgumentException("Username is required");
-        }
-        if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password is required");
-        }
+    public UserResponse saveUser(CreateUserRequest request) {
 
         //System.out.println("RAW : " + userDto.getPassword());
         //System.out.println("ENCODED : " + passwordEncoder.encode(userDto.getPassword()));
 
-        UserEntity userEntity = userMapper.toEntity(userDto);
+        String userName = request.getUserName().trim();
+
+        if (userRepository.existsByUserName(userName)) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        UserEntity userEntity = userMapper.toEntity(request);
+        userEntity.setUserName(userName);
 
         userEntity.setCreatedOn(Timestamp.from(Instant.now()));
 
-        userEntity.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword().trim()));
 
         UserEntity saved = userRepository.save(userEntity);
 
-        return userMapper.toDto(saved);
+        return userMapper.toResponse(saved);
     }
 
-    public UserDto updateUserRole(Long userId, UserRole role) {
+    public UserResponse updateUserRole(Long userId, UserRole role) {
 
         Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        if (!(principal instanceof UserEntity)) {
+        if (!(principal instanceof UserEntity currentUser)) {
             throw new IllegalStateException("Invalid authentication principal");
         }
-
-        UserEntity currentUser = (UserEntity) principal;
 
         if (currentUser.getUserId() == userId) {
             throw new IllegalArgumentException("Admins cannot change their own role");
@@ -98,41 +99,45 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         userEntity.setRole(role);
-        return userMapper.toDto(userRepository.save(userEntity));
+        return userMapper.toResponse(userRepository.save(userEntity));
     }
 
-    public UserDto updateUser(UserDto userDto, Long userId) {
+    public UserResponse updateUser(UpdateUserRequest request, Long userId) {
 
         UserEntity existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
-        if (userDto.getUserName() != null && userDto.getUserName().isBlank()) {
-            throw new IllegalArgumentException("Username cannot be blank");
+        if (request.getUserName() != null) {
+            String newUserName = request.getUserName().trim();
+
+            if (!newUserName.equals(existingUser.getUserName()) &&
+                    userRepository.existsByUserName(newUserName)) {
+                throw new RuntimeException("Username already exists");
+            }
+
+            existingUser.setUserName(newUserName);
         }
-        if (userDto.getPassword() != null && userDto.getPassword().isBlank()) {
+        if (request.getPassword() != null && request.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password cannot be blank");
         }
 
-        if (userDto.getUserName() != null) {
-            existingUser.setUserName(userDto.getUserName());
-        }
-        if (userDto.getPassword() != null) {
-            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        if (request.getPassword() != null) {
+            existingUser.setPassword(passwordEncoder.encode(request.getPassword().trim()));
         }
 
-        if (userDto.getGender() != null) {
-            existingUser.setGender(userDto.getGender());
+        if (request.getGender() != null) {
+            existingUser.setGender(request.getGender());
         }
 
-        if (userDto.getDateOfBirth() != null) {
-            existingUser.setDateOfBirth(userDto.getDateOfBirth());
+        if (request.getDateOfBirth() != null) {
+            existingUser.setDateOfBirth(request.getDateOfBirth());
         }
 
         existingUser.setUpdatedOn(Timestamp.from(Instant.now()));
 
         UserEntity saved = userRepository.save(existingUser);
 
-        return userMapper.toDto(saved);
+        return userMapper.toResponse(saved);
     }
 
 }

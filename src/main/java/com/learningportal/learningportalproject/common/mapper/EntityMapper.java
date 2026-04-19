@@ -3,12 +3,12 @@ package com.learningportal.learningportalproject.common.mapper;
 import java.util.List;
 
 public interface EntityMapper<D, E> {
-	D toDto(E e);
+    D toDto(E e);
 
-	E toEntity(D d);
+    E toEntity(D d);
 
-	List<D> toDto(List<E> elist);
+    List<D> toDto(List<E> elist);
 
-	List<E> toEntity(List<D> dlist);
+    List<E> toEntity(List<D> dlist);
 
 }

@@ -1,19 +1,18 @@
-
 package com.learningportal.learningportalproject.user;
+
+import com.learningportal.learningportalproject.user.dto.CreateUserRequest;
+import com.learningportal.learningportalproject.user.dto.UserResponse;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 
-import com.learningportal.learningportalproject.common.mapper.EntityMapper;
-import org.mapstruct.Mapper;
-
 @Mapper(componentModel = "spring")
-public interface UserMapper extends EntityMapper<UserDto, UserEntity> {
-	UserDto toDto(UserEntity entity);
+public interface UserMapper {
 
-	UserEntity toEntity(UserDto dto);
+    UserResponse toResponse(UserEntity entity);
 
-	List<UserDto> toDto(List<UserEntity> entitylist);
+    UserEntity toEntity(CreateUserRequest request);
 
-	List<UserEntity> toEntity(List<UserDto> dtolist);
+    List<UserResponse> toResponse(List<UserEntity> entities);
 
 }
